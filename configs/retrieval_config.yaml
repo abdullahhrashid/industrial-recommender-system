@@ -1,0 +1,26 @@
+experiment:
+  project_name: 'two-tower-retrieval'
+
+data:
+  train_path: '../data/processed/train.parquet'
+  val_path: '../data/processed/val.parquet'
+  metadata_path: '../data/artifacts/final_metadata.pkl'
+  num_workers: 0
+
+model:
+  id_embed_dim: 256
+  hidden_dim: 256
+  dropout_p: 0.4
+  lstm_hidden_size: 256
+
+training:
+  batch_size: 4096
+  num_epochs: 50
+  learning_rate: 0.005
+  weight_decay: 0.00001
+  temperature: 0.07
+  num_global_negs: 4096
+  early_stop_patience: 4
+
+evaluation:
+  eval_batch_size: 1024

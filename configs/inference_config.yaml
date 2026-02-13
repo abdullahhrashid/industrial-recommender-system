@@ -1,0 +1,25 @@
+retrieval:
+  config_path: 'configs/retrieval_config.yaml'
+  checkpoint_path: 'checkpoints/retrieval_v5_256_dims_lr_wd_50_epochs/best_retrieval_model.pth'
+
+ranking:
+  checkpoint_path: 'checkpoints/ranker_v2_more_dims/best_ranking_model.pth'
+  embed_dim: 256
+  hidden_dims: [512, 512, 256]
+  dropout_p: 0.2
+
+faiss:
+  index_path: 'data/artifacts/faiss_index.bin'
+  metadata_path: 'data/artifacts/faiss_metadata.pkl'
+  item_embeds_path: 'data/artifacts/faiss_item_embeddings.npy'
+  num_candidates: 2000
+
+data:
+  train_path: 'data/processed/train.parquet'
+  val_path: 'data/processed/val.parquet'
+  test_path: 'data/processed/test.parquet'
+  items_path: 'data/processed/items.csv'
+
+server:
+  host: '0.0.0.0'
+  port: 8000

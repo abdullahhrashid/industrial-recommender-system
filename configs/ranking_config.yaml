@@ -1,0 +1,26 @@
+experiment:
+  project_name: 'ranking-model'
+
+data:
+  train_path: '../data/processed/train.parquet'
+  val_path: '../data/processed/val.parquet'
+  item_embeds_path: '../data/artifacts/faiss_item_embeddings.npy'
+  train_user_embeds_path: '../data/artifacts/train_user_embeds.npy'
+  val_user_embeds_path: '../data/artifacts/val_user_embeds.npy'
+  train_candidates_path: '../data/artifacts/train_candidates.npy'
+  val_candidates_path: '../data/artifacts/val_candidates.npy'
+  num_workers: 0
+
+model:
+  embed_dim: 256
+  hidden_dims: [512, 256]
+  dropout_p: 0.2
+
+training:
+  batch_size: 64
+  num_epochs: 25
+  learning_rate: 0.001
+  weight_decay: 0.0001
+
+evaluation:
+  eval_batch_size: 32
