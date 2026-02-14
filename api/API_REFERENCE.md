@@ -219,15 +219,29 @@ sequenceDiagram
     participant RM as Ranking Model
 
     Client->>API: GET /recommend/42?top_k=10
-    API->>API: Look up user history
-    API->>UT: Encode history → user embedding (256-d)
+    activate API
+    
+    Note right of API: Look up user history
+    
+    API->>UT: Encode history<br/>→ user embedding (256-d)
+    activate UT
     UT-->>API: user_emb
+    deactivate UT
+    
     API->>FAISS: Search(user_emb, k=2000)
+    activate FAISS
     FAISS-->>API: candidate_indices + scores
-    API->>API: Filter seen items
-    API->>RM: Score(user_emb, candidate_embeds[])
+    deactivate FAISS
+    
+    Note right of API: Filter seen items
+    
+    API->>RM: Score(user_emb,<br/>candidate_embeds[])
+    activate RM
     RM-->>API: ranking_scores[]
-    API->>API: Sort by ranking score, take top 10
+    deactivate RM
+    
+    Note right of API: Sort by ranking score,<br/>take top 10
+    
     API-->>Client: JSON response
 ```
 
