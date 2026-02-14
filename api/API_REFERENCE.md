@@ -212,6 +212,7 @@ The `/recommend` endpoint performs the following steps internally:
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant Client
     participant API as FastAPI
     participant UT as User Tower
@@ -221,28 +222,28 @@ sequenceDiagram
     Client->>API: GET /recommend/42?top_k=10
     activate API
     
-    Note right of API: Look up user history
+    Note over API: Look up user history
     
-    API->>UT: Encode history<br/>→ user embedding (256-d)
+    API->>UT: Encode history<br/>(User Embedding)
     activate UT
-    UT-->>API: user_emb
+    UT-->>API: 256-d vector
     deactivate UT
     
-    API->>FAISS: Search(user_emb, k=2000)
+    API->>FAISS: ANN Search(user_emb)
     activate FAISS
-    FAISS-->>API: candidate_indices + scores
+    FAISS-->>API: Candidate IDs + Scores
     deactivate FAISS
     
-    Note right of API: Filter seen items
+    Note over API: Filter seen items
     
-    API->>RM: Score(user_emb,<br/>candidate_embeds[])
+    API->>RM: Re-rank Candidates
     activate RM
-    RM-->>API: ranking_scores[]
+    RM-->>API: Ranking Scores
     deactivate RM
     
-    Note right of API: Sort by ranking score,<br/>take top 10
+    Note over API: Sort & Select Top-K
     
-    API-->>Client: JSON response
+    API-->>Client: JSON Response
 ```
 
 **Performance characteristics:**
