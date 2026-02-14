@@ -1,7 +1,7 @@
 <p align="center">
-  <h1 align="center">🎬 Two-Stage Neural Recommendation System</h1>
+  <h1 align="center">Two-Stage Neural Recommendation System</h1>
   <p align="center">
-    <em>Industrial-grade Retrieval & Ranking pipeline for the Amazon Movies & TV dataset</em>
+    <em>Industrial-grade Retrieval & Ranking pipeline for the Amazon Products Dataset (Movies & TV Category)</em>
   </p>
   <p align="center">
     <a href="#architecture"><img src="https://img.shields.io/badge/Architecture-Two--Stage-blue" alt="Architecture"></a>
@@ -52,9 +52,9 @@
 
 ## Overview
 
-This project implements a **production-grade, two-stage recommendation system** that mirrors the architecture used by companies like YouTube, Pinterest, and Spotify. It operates on the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) dataset (Movies & TV category) — a catalog of **434,000+ items** and **102,000+ users** — and consists of:
+This project implements a **production-grade, two-stage recommendation system** that mirrors the architecture used by companies like YouTube, Pinterest, and Spotify. It operates on the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) dataset (Movies & TV category) on a catalog of **434,000+ items** and **102,000+ users**, and consists of:
 
-1. **Retrieval Stage** — A Two-Tower neural network that learns user and item embeddings in a shared latent space, enabling fast approximate nearest neighbor (ANN) candidate generation via FAISS.
+1. **Retrieval Stage** — A Two-Tower architecture that learns user and item embeddings in a shared latent space, enabling fast approximate nearest neighbor (ANN) candidate generation via FAISS.
 2. **Ranking Stage** — A cross-interaction MLP that re-scores the retrieved candidates with richer feature interactions to produce the final ordered recommendations.
 
 The system is a **hybrid recommender** that fuses collaborative filtering signals (learned ID embeddings capturing user-item interaction patterns) with content-based signals (semantic text embeddings from a pretrained sentence transformer). A learned gating network dynamically balances these two signals per item, making the system robust to both warm and **cold-start items** — a critical challenge in this dataset where a significant portion of items have limited interaction history.
@@ -71,26 +71,26 @@ The system is fully containerized with Docker (available on [Docker Hub](https:/
 flowchart LR
     subgraph Offline["Offline Pipeline"]
         direction TB
-        A["Raw Data\n(Reviews + Metadata)"] --> B["Preprocessing\n& K-Core Filtering"]
-        B --> C["Temporal\nTrain/Val/Test Split"]
-        C --> D["Sentence-Transformer\nText Embeddings"]
-        D --> E["Two-Tower\nRetrieval Training"]
-        E --> F["Export Item\nEmbeddings"]
-        F --> G["Build FAISS\nIndex"]
-        G --> H["Pre-compute\nUser Embeddings"]
-        H --> I["Pre-compute\nFAISS Candidates"]
-        I --> J["Ranking Model\nTraining"]
+        A["Raw Data<br/>(Reviews + Metadata)"] --> B["Preprocessing<br/>& K-Core Filtering"]
+        B --> C["Temporal<br/>Train/Val/Test Split"]
+        C --> D["Sentence-Transformer<br/>Text Embeddings"]
+        D --> E["Two-Tower<br/>Retrieval Training"]
+        E --> F["Export Item<br/>Embeddings"]
+        F --> G["Build FAISS<br/>Index"]
+        G --> H["Pre-compute<br/>User Embeddings"]
+        H --> I["Pre-compute<br/>FAISS Candidates"]
+        I --> J["Ranking Model<br/>Training"]
     end
 
     subgraph Online["Online Inference"]
         direction TB
-        K["User Request"] --> L["Encode User History\n(User Tower)"]
-        L --> M["FAISS ANN Search\n(Top-K Candidates)"]
-        M --> N["Neural Ranker\n(Re-score & Sort)"]
-        N --> O["Final Top-N\nRecommendations"]
+        K["User Request"] --> L["Encode User History<br/>(User Tower)"]
+        L --> M["FAISS ANN Search<br/>(Top-K Candidates)"]
+        M --> N["Neural Ranker<br/>(Re-score & Sort)"]
+        N --> O["Final Top-N<br/>Recommendations"]
     end
 
-    Offline -.->|"Trained Models\n& FAISS Index"| Online
+    Offline -.->|"Trained Models<br/>& FAISS Index"| Online
 
     style Offline fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
     style Online fill:#0f3460,stroke:#16213e,color:#e0e0e0
@@ -104,23 +104,23 @@ The retrieval model encodes users and items into a shared 256-dimensional embedd
 flowchart TB
     subgraph UserTower["User Tower"]
         direction TB
-        UH["User History\n(item₁, item₂, ..., itemₙ)"]
-        UH --> IE1["Shared Item Encoder\n(per history item)"]
-        IE1 --> LSTM["LSTM\n(Sequential Modeling)"]
+        UH["User History<br/>(item₁, item₂, ..., itemₙ)"]
+        UH --> IE1["Shared Item Encoder<br/>(per history item)"]
+        IE1 --> LSTM["LSTM<br/>(Sequential Modeling)"]
         LSTM --> UP["Linear Projection"]
         UP --> UN["L2 Normalize"]
     end
 
     subgraph ItemTower["Item Tower"]
         direction TB
-        TF["Text Features\n(title, genre, desc)"]
+        TF["Text Features<br/>(title, genre, desc)"]
         ID["Item ID"]
-        TF --> TP["Text Projection\n(Linear)"]
+        TF --> TP["Text Projection<br/>(Linear)"]
         ID --> EMB["ID Embedding"]
-        TP --> GATE["Gating Network\nσ(W·[id ∥ text])"]
+        TP --> GATE["Gating Network<br/>σ(W·[id ∥ text])"]
         EMB --> GATE
-        GATE --> FUSE["Gated Fusion\nα·id + (1-α)·text"]
-        FUSE --> MLP["Fusion MLP\n+ LayerNorm + ReLU"]
+        GATE --> FUSE["Gated Fusion<br/>α·id + (1-α)·text"]
+        FUSE --> MLP["Fusion MLP<br/>+ LayerNorm + ReLU"]
         MLP --> IN["L2 Normalize"]
     end
 
@@ -137,16 +137,16 @@ The ranking model takes the user embedding and each candidate item embedding fro
 
 ```mermaid
 flowchart LR
-    UE["User Embedding\n(256-d)"]
-    CE["Candidate Item\nEmbedding (256-d)"]
-    UE --> HAD["Hadamard Product\nuser ⊙ item"]
+    UE["User Embedding<br/>(256-d)"]
+    CE["Candidate Item<br/>Embedding (256-d)"]
+    UE --> HAD["Hadamard Product<br/>user ⊙ item"]
     CE --> HAD
-    UE --> CAT["Concatenate\n[user ∥ item ∥ hadamard]"]
+    UE --> CAT["Concatenate<br/>[user ∥ item ∥ hadamard]"]
     CE --> CAT
     HAD --> CAT
-    CAT --> MLP1["Linear(768 → 512)\n+ LayerNorm + ReLU + Dropout"]
-    MLP1 --> MLP2["Linear(512 → 256)\n+ LayerNorm + ReLU + Dropout"]
-    MLP2 --> OUT["Linear(256 → 1)\n→ Ranking Score"]
+    CAT --> MLP1["Linear(768 → 512)<br/>+ LayerNorm + ReLU + Dropout"]
+    MLP1 --> MLP2["Linear(512 → 256)<br/>+ LayerNorm + ReLU + Dropout"]
+    MLP2 --> OUT["Linear(256 → 1)<br/>→ Ranking Score"]
 
     style UE fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style CE fill:#0f3460,stroke:#16213e,color:#e0e0e0
@@ -157,7 +157,7 @@ flowchart LR
 
 ## Hybrid Cold-Start Handling
 
-One of the hardest challenges in this project is the **cold-start problem**. The Amazon Movies & TV catalog contains 434,000+ products, but a large fraction of items appear only in the validation or test sets and were never seen during training. Traditional collaborative filtering approaches would completely fail on these items.
+One of the hardest challenges in this project is the **cold-start problem**. The Amazon Movies & TV catalog contains 434,000+ products **(after filtering)**, but a large fraction of items were never seen during training. Traditional collaborative filtering approaches would completely fail on these items.
 
 This system addresses cold-start through a **hybrid architecture** that combines two complementary signals:
 
@@ -174,6 +174,18 @@ This system addresses cold-start through a **hybrid architecture** that combines
 4. **Semantic Text Backbone** — The `all-mpnet-base-v2` sentence transformer produces rich 768-d embeddings from item metadata (title, genre, description, cast, director, etc.), providing a strong content-based signal regardless of interaction history.
 
 This hybrid approach is what makes the system practical for real-world deployment, where new items are constantly being added to the catalog.
+
+### Cold User Handling
+
+While the hybrid architecture solves the **cold-item** problem, the system also needs to handle **cold users**, new users with little to no interaction history.
+
+**Fallback Strategy:**
+
+- **New users (0–2 items)** — The system falls back to a **popularity-based heuristic**, recommending the most-watched movies/shows globally or within relevant genres. This ensures new users still receive reasonable recommendations even before the model has learned their preferences.
+- **Minimum threshold (≥3 items)** — Once a user has interacted with at least 3 items, the personalized Two-Tower model can activate. The LSTM user encoder can begin to capture sequential patterns and preferences from this minimal history.
+- **Gradual improvement** — As the user's history grows, the personalized recommendations become increasingly accurate, leveraging the full power of the collaborative filtering signals.
+
+This tiered approach ensures the system gracefully handles the full spectrum of users, from brand-new accounts to power users with hundreds of interactions. Though this has not been implemented in this version as I had filtered out and kept only active users.
 
 ## Dataset
 
@@ -204,8 +216,8 @@ The data flows through a multi-stage processing pipeline, transforming raw JSON 
 
 ```mermaid
 flowchart TB
-    R1["Movies_and_TV.jsonl.gz\n(17.3M reviews)"] --> RP["review_preprocessing.py"]
-    R2["meta_Movies_and_TV.jsonl.gz\n(product metadata)"] --> PP["product_preprocessing.py"]
+    R1["Movies_and_TV.jsonl.gz<br/>(17.3M reviews)"] --> RP["review_preprocessing.py"]
+    R2["meta_Movies_and_TV.jsonl.gz<br/>(product metadata)"] --> PP["product_preprocessing.py"]
 
     RP --> INT["interactions.csv"]
     PP --> PROD["products.csv"]
@@ -227,7 +239,7 @@ flowchart TB
     VAL1 --> SF
     TEST1 --> SF
 
-    SF --> EMB["embedding.npy\n(padded)"]
+    SF --> EMB["embedding.npy<br/>(padded)"]
     SF --> BRIDGE["global_to_warm_map.npy"]
     SF --> META["final_metadata.pkl"]
     SF --> TRAINF["train.parquet (final)"]
@@ -288,9 +300,9 @@ flowchart TB
 
 **Script:** `src/features/sequence_features.py`
 
-- Creates a **global index** system mapping ASINs → contiguous integers (starting from 1, with 0 reserved for padding).
-- Builds `embedding.npy` — the final padded embedding matrix (zero-vector at index 0).
-- Creates `global_to_warm_map.npy` — a bridge map from global indices to model-internal warm item IDs.
+- Creates a **global index** system mapping ASINs → contiguous integers (starting from 2, with 0 reserved for padding and 1 reserved for cold items).
+- Builds `embedding.npy`, the final padded embedding matrix (zero-vector at index 0 for padding).
+- Creates `global_to_warm_map.npy`, a bridge map from global indices to model-internal warm item IDs.
 - Converts all history sequences and target items to use global indices.
 - Saves `final_metadata.pkl` with vocabulary sizes, embedding dimensions, and mapping dictionaries.
 - Outputs the final `train.parquet`, `val.parquet`, `test.parquet`, and `items.csv` to `data/processed/`.
@@ -305,11 +317,11 @@ The item tower produces a 256-dimensional L2-normalized embedding for each item 
 
 | Component | Details |
 |---|---|
-| **ID Embedding** | `nn.Embedding(vocab_size, 256)` — Learned embedding for each item ID. Padding index = 0, cold-start index = 1 (frozen at zero). |
-| **Text Projection** | `nn.Linear(768, 256)` — Projects 768-d sentence-transformer embeddings to the shared 256-d space. |
-| **Gating Network** | `nn.Linear(512, 1) → Sigmoid` — Learns a scalar gate `α` from the concatenation of ID and text embeddings. |
-| **Gated Fusion** | `α · id_embed + (1 - α) · text_proj` — Dynamically balances ID and text signals per item. |
-| **Fusion MLP** | `Linear(256, 256) → LayerNorm → ReLU → Linear(256, 256)` — Produces the final fused item representation. |
+| **ID Embedding** | `nn.Embedding(vocab_size, 256)` - Learned embedding for each item ID. Padding index = 0, cold-start index = 1 (frozen at zero). |
+| **Text Projection** | `nn.Linear(768, 256)` - Projects 768-d sentence-transformer embeddings to the shared 256-d space. |
+| **Gating Network** | `nn.Linear(512, 1) → Sigmoid` - Learns a scalar gate `α` from the concatenation of ID and text embeddings. |
+| **Gated Fusion** | `α · id_embed + (1 - α) · text_proj` - Dynamically balances ID and text signals per item. |
+| **Fusion MLP** | `Linear(256, 256) → LayerNorm → ReLU → Linear(256, 256)` - Produces the final fused item representation. |
 | **ID Dropout** | During training, randomly replaces item IDs with the cold-start index (p=0.4). Forces the model to rely on text features and enables generalization to unseen items. |
 | **Normalization** | All output embeddings are L2-normalized, ensuring cosine similarity matches dot product. |
 
@@ -321,16 +333,16 @@ The user tower encodes a variable-length history of items into a single 256-d us
 |---|---|
 | **Shared Item Encoder** | Each history item is encoded using the **same** item tower, producing a sequence of item embeddings. |
 | **History Masking** | Padding positions are zeroed out via an explicit mask before LSTM processing. |
-| **LSTM** | `nn.LSTM(256, 256, num_layers=1, batch_first=True)` — Captures sequential patterns and temporal dependencies in the user's viewing history. |
+| **LSTM** | `nn.LSTM(256, 256, num_layers=1, batch_first=True)` - Captures sequential patterns and temporal dependencies in the user's viewing history. |
 | **Packed Sequences** | Uses `pack_padded_sequence` to avoid computation on padding tokens. |
-| **Projection** | `nn.Linear(256, 256)` — Maps LSTM hidden state to the shared embedding space. |
+| **Projection** | `nn.Linear(256, 256)` - Maps LSTM hidden state to the shared embedding space. |
 | **Normalization** | L2-normalized output for consistent cosine similarity computation. |
 
 ### Loss Function
 
 **InfoNCE (Noise Contrastive Estimation)**
 
-The retrieval model is trained with InfoNCE loss — a contrastive objective that pushes user embeddings close to positive item embeddings and apart from negative items.
+The retrieval model is trained with InfoNCE loss, a contrastive objective that pushes user embeddings close to positive item embeddings and apart from negative items.
 
 | Component | Details |
 |---|---|
@@ -352,7 +364,7 @@ A feedforward MLP that scores user-item pairs using three feature types:
 
 **Architecture:** `Linear(768 → 512) → LayerNorm → ReLU → Dropout(0.2) → Linear(512 → 256) → LayerNorm → ReLU → Dropout(0.2) → Linear(256 → 1)`
 
-**Loss:** `BCEWithLogitsLoss` — Binary cross-entropy with the positive candidate labeled 1 and all FAISS-retrieved negatives labeled 0.
+**Loss:** `BCEWithLogitsLoss`, Binary cross-entropy with the positive candidate labeled 1 and all FAISS-retrieved negatives labeled 0.
 
 ---
 
@@ -427,7 +439,7 @@ WANDB_API_KEY=your_key_here
 
 ### Retrieval Metrics (Test Set)
 
-Evaluated against the **full catalog of 434,206 items** — the retrieval model must find the single target item among hundreds of thousands of candidates.
+Evaluated against the **full catalog of 434,206 items**, the retrieval model must find the single target item among hundreds of thousands of candidates.
 
 **Accuracy:**
 
@@ -454,7 +466,7 @@ Evaluated against the **full catalog of 434,206 items** — the retrieval model 
 
 ### Ranking Metrics (Test Set)
 
-Evaluated on the **top-2,000 FAISS candidates** per user — the ranker re-orders this pre-filtered set.
+Evaluated on the **top-2,000 FAISS candidates** per user, the ranker re-orders this pre-filtered set.
 
 | Metric | Value |
 |---|---|
@@ -471,7 +483,7 @@ Evaluated on the **top-2,000 FAISS candidates** per user — the ranker re-order
 | **MAP@20** | 0.4365 |
 
 > [!NOTE]
-> **Why ranking metrics appear higher than retrieval metrics:** This is the expected behavior in a two-stage system — the two stages are evaluated on fundamentally different tasks. The retrieval model searches the **entire catalog of 434,206 items** to find relevant candidates (needle-in-a-haystack). The ranking model only needs to correctly order the **2,000 pre-filtered FAISS candidates** — a search space that is **~217× smaller** and already enriched with relevant items by the retriever. This cascading narrowing of the candidate set is precisely the reason two-stage architectures exist: the retriever handles the hard recall problem at scale, while the ranker focuses the easier (but equally critical) precision problem on a manageable candidate set.
+> **Why ranking metrics appear higher than retrieval metrics:** This is the expected behavior in a two-stage system, the two stages are evaluated on fundamentally different tasks. The retrieval model searches the **entire catalog of 434,206 items** to find relevant candidates (needle-in-a-haystack). The ranking model only needs to correctly order the **2,000 pre-filtered FAISS candidates**, a search space that is **~217× smaller** and already enriched with relevant items by the retriever. This cascading narrowing of the candidate set is precisely the reason two-stage architectures exist: the retriever handles the hard recall problem at scale, while the ranker focuses the easier (but equally critical) precision problem on a manageable candidate set.
 
 ### API Performance
 
@@ -490,16 +502,16 @@ Benchmarked on CPU (inference-only):
 
 ## Hardware Limitations & Future Work
 
-This entire project — including all data processing, embedding generation, model training, and evaluation — was developed and trained **exclusively on CPU**. This imposed significant constraints on what could be achieved:
+This project including all data processing, embedding generation, model training, and evaluation was developed and trained **on very limited hardware**. This imposed significant constraints on what could be achieved:
 
-- **Limited hyperparameter search** — Each retrieval training run takes many hours on CPU, making extensive grid search impractical.
+- **Limited hyperparameter search** — Each retrieval training run takes many hours, making extensive grid search impractical.
 - **Smaller batch sizes** — GPU training would allow much larger batch sizes, which directly improves contrastive learning (more in-batch negatives = stronger gradient signal).
 - **Fewer training epochs** — Longer training with more sophisticated schedulers (cosine annealing, warm restarts) would likely improve convergence.
-- **Simpler architectures** — GPU resources would enable experimenting with multi-layer LSTMs, Transformer-based user encoders, or deeper fusion networks.
-- **No log-Q correction** — The infrastructure for sampling-bias correction was built (target probabilities are computed and plumbed through), but was disabled to simplify training within CPU time constraints.
+- **Simpler architectures** — Better GPU resources would enable experimenting with multi-layer LSTMs, Transformer-based user encoders, or deeper fusion networks.
+- **No log-Q correction** — The infrastructure for sampling-bias correction was built (target probabilities are computed and plumbed through), but was disabled to simplify training within time constraints.
 
 With GPU resources, the following improvements would be expected:
-- **2–3× improvement in Recall@K** from larger batches and longer training
+- **Improvement in Recall@K** from larger batches, longer training and deeper architectures
 - **Transformer-based user encoder** (e.g., SASRec-style self-attention) instead of LSTM for better sequential modeling
 - **More negative sampling strategies** (hard negative mining, mixed-negative sampling with popularity correction)
 - **Approximate FAISS indices** (IVF, HNSW) for sub-linear search at scale beyond 1M items
