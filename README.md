@@ -734,7 +734,7 @@ recSys/
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/recSys.git
+git clone https://github.com/abdullahhrashid/industrial-recommender-system.git
 cd recSys
 
 # Create virtual environment
